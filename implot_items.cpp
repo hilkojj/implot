@@ -319,19 +319,19 @@ ImPlotItem* GetCurrentItem() {
     return gp.CurrentItem;
 }
 
-void SetNextLineStyle(const ImVec4& col, float weight) {
+void SetNextLineStyle(const ImU32 col, float weight) {
     ImPlotContext& gp = *GImPlot;
     gp.NextItemData.Colors[ImPlotCol_Line] = col;
     gp.NextItemData.LineWeight             = weight;
 }
 
-void SetNextFillStyle(const ImVec4& col, float alpha) {
+void SetNextFillStyle(const ImU32 col, float alpha) {
     ImPlotContext& gp = *GImPlot;
     gp.NextItemData.Colors[ImPlotCol_Fill] = col;
     gp.NextItemData.FillAlpha              = alpha;
 }
 
-void SetNextMarkerStyle(ImPlotMarker marker, float size, const ImVec4& fill, float weight, const ImVec4& outline) {
+void SetNextMarkerStyle(ImPlotMarker marker, float size, const ImU32 fill, float weight, const ImU32 outline) {
     ImPlotContext& gp = *GImPlot;
     gp.NextItemData.Marker                          = marker;
     gp.NextItemData.Colors[ImPlotCol_MarkerFill]    = fill;
@@ -340,18 +340,18 @@ void SetNextMarkerStyle(ImPlotMarker marker, float size, const ImVec4& fill, flo
     gp.NextItemData.MarkerWeight                    = weight;
 }
 
-void SetNextErrorBarStyle(const ImVec4& col, float size, float weight) {
+void SetNextErrorBarStyle(const ImU32 col, float size, float weight) {
     ImPlotContext& gp = *GImPlot;
     gp.NextItemData.Colors[ImPlotCol_ErrorBar] = col;
     gp.NextItemData.ErrorBarSize               = size;
     gp.NextItemData.ErrorBarWeight             = weight;
 }
 
-ImVec4 GetLastItemColor() {
+ImU32 GetLastItemColor() {
     ImPlotContext& gp = *GImPlot;
     if (gp.PreviousItem)
-        return ImGui::ColorConvertU32ToFloat4(gp.PreviousItem->Color);
-    return ImVec4();
+        return gp.PreviousItem->Color;
+    return 0u;
 }
 
 void BustItemCache() {
@@ -404,9 +404,9 @@ bool BeginItem(const char* label_id, ImPlotItemFlags flags, ImPlotCol recolor_fr
     // set/override item color
     if (recolor_from != -1) {
         if (!IsColorAuto(s.Colors[recolor_from]))
-            item->Color = ImGui::ColorConvertFloat4ToU32(s.Colors[recolor_from]);
+            item->Color = s.Colors[recolor_from];
         else if (!IsColorAuto(gp.Style.Colors[recolor_from]))
-            item->Color = ImGui::ColorConvertFloat4ToU32(gp.Style.Colors[recolor_from]);
+            item->Color = gp.Style.Colors[recolor_from];
         else if (just_created)
             item->Color = NextColormapColorU32();
     }
@@ -426,13 +426,13 @@ bool BeginItem(const char* label_id, ImPlotItemFlags flags, ImPlotCol recolor_fr
         return false;
     }
     else {
-        ImVec4 item_color = ImGui::ColorConvertU32ToFloat4(item->Color);
+        ImU32 item_color = item->Color;
         // stage next item colors
         s.Colors[ImPlotCol_Line]           = IsColorAuto(s.Colors[ImPlotCol_Line])          ? ( IsColorAuto(ImPlotCol_Line)           ? item_color                 : gp.Style.Colors[ImPlotCol_Line]          ) : s.Colors[ImPlotCol_Line];
         s.Colors[ImPlotCol_Fill]           = IsColorAuto(s.Colors[ImPlotCol_Fill])          ? ( IsColorAuto(ImPlotCol_Fill)           ? item_color                 : gp.Style.Colors[ImPlotCol_Fill]          ) : s.Colors[ImPlotCol_Fill];
         s.Colors[ImPlotCol_MarkerOutline]  = IsColorAuto(s.Colors[ImPlotCol_MarkerOutline]) ? ( IsColorAuto(ImPlotCol_MarkerOutline)  ? s.Colors[ImPlotCol_Line]   : gp.Style.Colors[ImPlotCol_MarkerOutline] ) : s.Colors[ImPlotCol_MarkerOutline];
         s.Colors[ImPlotCol_MarkerFill]     = IsColorAuto(s.Colors[ImPlotCol_MarkerFill])    ? ( IsColorAuto(ImPlotCol_MarkerFill)     ? s.Colors[ImPlotCol_Line]   : gp.Style.Colors[ImPlotCol_MarkerFill]    ) : s.Colors[ImPlotCol_MarkerFill];
-        s.Colors[ImPlotCol_ErrorBar]       = IsColorAuto(s.Colors[ImPlotCol_ErrorBar])      ? ( GetStyleColorVec4(ImPlotCol_ErrorBar)                                                                         ) : s.Colors[ImPlotCol_ErrorBar];
+        s.Colors[ImPlotCol_ErrorBar]       = IsColorAuto(s.Colors[ImPlotCol_ErrorBar])      ? ( GetStyleColorU32(ImPlotCol_ErrorBar)                                                                         ) : s.Colors[ImPlotCol_ErrorBar];
         // stage next item style vars
         s.LineWeight         = s.LineWeight       < 0 ? gp.Style.LineWeight       : s.LineWeight;
         s.Marker             = s.Marker           < 0 ? gp.Style.Marker           : s.Marker;
@@ -444,8 +444,9 @@ bool BeginItem(const char* label_id, ImPlotItemFlags flags, ImPlotCol recolor_fr
         s.DigitalBitHeight   = s.DigitalBitHeight < 0 ? gp.Style.DigitalBitHeight : s.DigitalBitHeight;
         s.DigitalBitGap      = s.DigitalBitGap    < 0 ? gp.Style.DigitalBitGap    : s.DigitalBitGap;
         // apply alpha modifier(s)
-        s.Colors[ImPlotCol_Fill].w       *= s.FillAlpha;
-        s.Colors[ImPlotCol_MarkerFill].w *= s.FillAlpha; // TODO: this should be separate, if it at all
+        // TODO(HJ):
+//        s.Colors[ImPlotCol_Fill].w       *= s.FillAlpha;
+//        s.Colors[ImPlotCol_MarkerFill].w *= s.FillAlpha; // TODO: this should be separate, if it at all
         // apply highlight mods
         if (item->LegendHovered) {
             if (!ImHasFlag(gp.CurrentItems->Legend.Flags, ImPlotLegendFlags_NoHighlightItem)) {
@@ -462,10 +463,10 @@ bool BeginItem(const char* label_id, ImPlotItemFlags flags, ImPlotCol recolor_fr
             }
         }
         // set render flags
-        s.RenderLine       = s.Colors[ImPlotCol_Line].w          > 0 && s.LineWeight > 0;
-        s.RenderFill       = s.Colors[ImPlotCol_Fill].w          > 0;
-        s.RenderMarkerFill = s.Colors[ImPlotCol_MarkerFill].w    > 0;
-        s.RenderMarkerLine = s.Colors[ImPlotCol_MarkerOutline].w > 0 && s.MarkerWeight > 0;
+        s.RenderLine       = s.Colors[ImPlotCol_Line]          != 0u && s.LineWeight > 0;
+        s.RenderFill       = s.Colors[ImPlotCol_Fill]          != 0u;
+        s.RenderMarkerFill = s.Colors[ImPlotCol_MarkerFill]    != 0u;
+        s.RenderMarkerLine = s.Colors[ImPlotCol_MarkerOutline] != 0u && s.MarkerWeight > 0;
         // push rendering clip rect
         PushPlotClipRect();
         return true;
@@ -2321,7 +2322,7 @@ void PlotPieChart(const char* const label_ids[], const T* values, int count, dou
                     ImVec2 size = ImGui::CalcTextSize(buffer);
                     double angle = a0 + (a1 - a0) * 0.5;
                     ImVec2 pos = PlotToPixels(center.x + 0.5 * radius * cos(angle), center.y + 0.5 * radius * sin(angle), IMPLOT_AUTO, IMPLOT_AUTO);
-                    ImU32 col = CalcTextColor(ImGui::ColorConvertU32ToFloat4(item->Color));
+                    ImU32 col = CalcTextColor(item->Color);
                     draw_list.AddText(pos - size * 0.5f, col, buffer);
                 }
                 a0 = a1;
@@ -2452,7 +2453,7 @@ void RenderHeatmap(ImDrawList& draw_list, const T* values, int rows, int cols, d
                     ImFormatString(buff, 32, fmt, values[i]);
                     ImVec2 size = ImGui::CalcTextSize(buff);
                     double t = ImClamp(ImRemap01((double)values[i], scale_min, scale_max),0.0,1.0);
-                    ImVec4 color = SampleColormap((float)t);
+                    ImU32 color = SampleColormap((float)t);
                     ImU32 col = CalcTextColor(color);
                     draw_list.AddText(px - size * 0.5f, col, buff);
                     i++;
@@ -2470,7 +2471,7 @@ void RenderHeatmap(ImDrawList& draw_list, const T* values, int rows, int cols, d
                     ImFormatString(buff, 32, fmt, values[i]);
                     ImVec2 size = ImGui::CalcTextSize(buff);
                     double t = ImClamp(ImRemap01((double)values[i], scale_min, scale_max),0.0,1.0);
-                    ImVec4 color = SampleColormap((float)t);
+                    ImU32 color = SampleColormap((float)t);
                     ImU32 col = CalcTextColor(color);
                     draw_list.AddText(px - size * 0.5f, col, buff);
                     i++;

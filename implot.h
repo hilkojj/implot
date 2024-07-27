@@ -64,7 +64,7 @@
 // Indicates variable should deduced automatically.
 #define IMPLOT_AUTO -1
 // Special color used to indicate that a color should be deduced automatically.
-#define IMPLOT_AUTO_COL ImVec4(0,0,0,-1)
+#define IMPLOT_AUTO_COL -1u
 // Macro for templated plotting functions; keeps header clean.
 #define IMPLOT_TMP template <typename T> IMPLOT_API
 
@@ -535,7 +535,7 @@ struct ImPlotStyle {
     ImVec2  PlotDefaultSize;         // = 400,300 default size used when ImVec2(0,0) is passed to BeginPlot
     ImVec2  PlotMinSize;             // = 200,150 minimum size plot frame can be when shrunk
     // style colors
-    ImVec4  Colors[ImPlotCol_COUNT]; // Array of styling colors. Indexable with ImPlotCol_ enums.
+    ImU32 Colors[ImPlotCol_COUNT]; // Array of styling colors. Indexable with ImPlotCol_ enums.
     // colormap
     ImPlotColormap Colormap;         // The current colormap. Set this to either an ImPlotColormap_ enum or an index returned by AddColormap.
     // settings/flags
@@ -931,18 +931,18 @@ IMPLOT_API void PlotDummy(const char* label_id, ImPlotDummyFlags flags=0);
 // user interactions can be retrieved through the optional output parameters.
 
 // Shows a draggable point at x,y. #col defaults to ImGuiCol_Text.
-IMPLOT_API bool DragPoint(int id, double* x, double* y, const ImVec4& col, float size = 4, ImPlotDragToolFlags flags = 0, bool* out_clicked = nullptr, bool* out_hovered = nullptr, bool* held = nullptr);
+IMPLOT_API bool DragPoint(int id, double* x, double* y, const ImU32 col, float size = 4, ImPlotDragToolFlags flags = 0, bool* out_clicked = nullptr, bool* out_hovered = nullptr, bool* held = nullptr);
 // Shows a draggable vertical guide line at an x-value. #col defaults to ImGuiCol_Text.
-IMPLOT_API bool DragLineX(int id, double* x, const ImVec4& col, float thickness = 1, ImPlotDragToolFlags flags = 0, bool* out_clicked = nullptr, bool* out_hovered = nullptr, bool* held = nullptr);
+IMPLOT_API bool DragLineX(int id, double* x, const ImU32 col, float thickness = 1, ImPlotDragToolFlags flags = 0, bool* out_clicked = nullptr, bool* out_hovered = nullptr, bool* held = nullptr);
 // Shows a draggable horizontal guide line at a y-value. #col defaults to ImGuiCol_Text.
-IMPLOT_API bool DragLineY(int id, double* y, const ImVec4& col, float thickness = 1, ImPlotDragToolFlags flags = 0, bool* out_clicked = nullptr, bool* out_hovered = nullptr, bool* held = nullptr);
+IMPLOT_API bool DragLineY(int id, double* y, const ImU32 col, float thickness = 1, ImPlotDragToolFlags flags = 0, bool* out_clicked = nullptr, bool* out_hovered = nullptr, bool* held = nullptr);
 // Shows a draggable and resizeable rectangle.
-IMPLOT_API bool DragRect(int id, double* x1, double* y1, double* x2, double* y2, const ImVec4& col, ImPlotDragToolFlags flags = 0, bool* out_clicked = nullptr, bool* out_hovered = nullptr, bool* held = nullptr);
+IMPLOT_API bool DragRect(int id, double* x1, double* y1, double* x2, double* y2, const ImU32 col, ImPlotDragToolFlags flags = 0, bool* out_clicked = nullptr, bool* out_hovered = nullptr, bool* held = nullptr);
 
 // Shows an annotation callout at a chosen point. Clamping keeps annotations in the plot area. Annotations are always rendered on top.
-IMPLOT_API void Annotation(double x, double y, const ImVec4& col, const ImVec2& pix_offset, bool clamp, bool round = false);
-IMPLOT_API void Annotation(double x, double y, const ImVec4& col, const ImVec2& pix_offset, bool clamp, const char* fmt, ...)           IM_FMTARGS(6);
-IMPLOT_API void AnnotationV(double x, double y, const ImVec4& col, const ImVec2& pix_offset, bool clamp, const char* fmt, va_list args) IM_FMTLIST(6);
+IMPLOT_API void Annotation(double x, double y, const ImU32 col, const ImVec2& pix_offset, bool clamp, bool round = false);
+IMPLOT_API void Annotation(double x, double y, const ImU32 col, const ImVec2& pix_offset, bool clamp, const char* fmt, ...)           IM_FMTARGS(6);
+IMPLOT_API void AnnotationV(double x, double y, const ImU32 col, const ImVec2& pix_offset, bool clamp, const char* fmt, va_list args) IM_FMTLIST(6);
 
 // Shows a x-axis tag at the specified coordinate value.
 IMPLOT_API void TagX(double x, const ImVec4& col, bool round = false);
@@ -1096,7 +1096,6 @@ IMPLOT_API void StyleColorsLight(ImPlotStyle* dst = nullptr);
 
 // Temporarily modify a style color. Don't forget to call PopStyleColor!
 IMPLOT_API void PushStyleColor(ImPlotCol idx, ImU32 col);
-IMPLOT_API void PushStyleColor(ImPlotCol idx, const ImVec4& col);
 // Undo temporary style color modification(s). Undo multiple pushes at once by increasing count.
 IMPLOT_API void PopStyleColor(int count = 1);
 
@@ -1115,16 +1114,16 @@ IMPLOT_API void PopStyleVar(int count = 1);
 // values in your ImPlotStyle or from Colormap data.
 
 // Set the line color and weight for the next item only.
-IMPLOT_API void SetNextLineStyle(const ImVec4& col = IMPLOT_AUTO_COL, float weight = IMPLOT_AUTO);
+IMPLOT_API void SetNextLineStyle(const ImU32 col = IMPLOT_AUTO_COL, float weight = IMPLOT_AUTO);
 // Set the fill color for the next item only.
-IMPLOT_API void SetNextFillStyle(const ImVec4& col = IMPLOT_AUTO_COL, float alpha_mod = IMPLOT_AUTO);
+IMPLOT_API void SetNextFillStyle(const ImU32 col = IMPLOT_AUTO_COL, float alpha_mod = IMPLOT_AUTO);
 // Set the marker style for the next item only.
-IMPLOT_API void SetNextMarkerStyle(ImPlotMarker marker = IMPLOT_AUTO, float size = IMPLOT_AUTO, const ImVec4& fill = IMPLOT_AUTO_COL, float weight = IMPLOT_AUTO, const ImVec4& outline = IMPLOT_AUTO_COL);
+IMPLOT_API void SetNextMarkerStyle(ImPlotMarker marker = IMPLOT_AUTO, float size = IMPLOT_AUTO, const ImU32 fill = IMPLOT_AUTO_COL, float weight = IMPLOT_AUTO, const ImU32 outline = IMPLOT_AUTO_COL);
 // Set the error bar style for the next item only.
-IMPLOT_API void SetNextErrorBarStyle(const ImVec4& col = IMPLOT_AUTO_COL, float size = IMPLOT_AUTO, float weight = IMPLOT_AUTO);
+IMPLOT_API void SetNextErrorBarStyle(const ImU32 col = IMPLOT_AUTO_COL, float size = IMPLOT_AUTO, float weight = IMPLOT_AUTO);
 
 // Gets the last item primary color (i.e. its legend icon color)
-IMPLOT_API ImVec4 GetLastItemColor();
+IMPLOT_API ImU32 GetLastItemColor();
 
 // Returns the null terminated string name for an ImPlotCol.
 IMPLOT_API const char* GetStyleColorName(ImPlotCol idx);
@@ -1150,7 +1149,6 @@ IMPLOT_API const char* GetMarkerName(ImPlotMarker idx);
 // an assert otherwise! By default colormaps are considered to be qualitative (i.e. discrete). If you want to create a
 // continuous colormap, set #qual=false. This will treat the colors you provide as keys, and ImPlot will build a linearly
 // interpolated lookup table. The memory footprint of this table will be exactly ((size-1)*255+1)*4 bytes.
-IMPLOT_API ImPlotColormap AddColormap(const char* name, const ImVec4* cols, int size, bool qual=true);
 IMPLOT_API ImPlotColormap AddColormap(const char* name, const ImU32*  cols, int size, bool qual=true);
 
 // Returns the number of available colormaps (i.e. the built-in + user-added count).
@@ -1177,9 +1175,9 @@ IMPLOT_API ImVec4 NextColormapColor();
 // Returns the size of a colormap.
 IMPLOT_API int GetColormapSize(ImPlotColormap cmap = IMPLOT_AUTO);
 // Returns a color from a colormap given an index >= 0 (modulo will be performed).
-IMPLOT_API ImVec4 GetColormapColor(int idx, ImPlotColormap cmap = IMPLOT_AUTO);
+IMPLOT_API ImU32 GetColormapColor(int idx, ImPlotColormap cmap = IMPLOT_AUTO);
 // Sample a color from the current colormap given t between 0 and 1.
-IMPLOT_API ImVec4 SampleColormap(float t, ImPlotColormap cmap = IMPLOT_AUTO);
+IMPLOT_API ImU32 SampleColormap(float t, ImPlotColormap cmap = IMPLOT_AUTO);
 
 // Shows a vertical color scale with linear spaced ticks using the specified color map. Use double hashes to hide label (e.g. "##NoLabel"). If scale_min > scale_max, the scale to color mapping will be reversed.
 IMPLOT_API void ColormapScale(const char* label, double scale_min, double scale_max, const ImVec2& size = ImVec2(0,0), const char* format = "%g", ImPlotColormapScaleFlags flags = 0, ImPlotColormap cmap = IMPLOT_AUTO);
@@ -1214,7 +1212,6 @@ IMPLOT_API void MapInputReverse(ImPlotInputMap* dst = nullptr);
 //-----------------------------------------------------------------------------
 
 // Render icons similar to those that appear in legends (nifty for data lists).
-IMPLOT_API void ItemIcon(const ImVec4& col);
 IMPLOT_API void ItemIcon(ImU32 col);
 IMPLOT_API void ColormapIcon(ImPlotColormap cmap);
 

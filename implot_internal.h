@@ -1173,7 +1173,7 @@ struct ImPlotNextPlotData
 
 // Temporary data storage for upcoming item
 struct ImPlotNextItemData {
-    ImVec4          Colors[5]; // ImPlotCol_Line, ImPlotCol_Fill, ImPlotCol_MarkerOutline, ImPlotCol_MarkerFill, ImPlotCol_ErrorBar
+    ImU32           Colors[5]; // ImPlotCol_Line, ImPlotCol_Fill, ImPlotCol_MarkerOutline, ImPlotCol_MarkerFill, ImPlotCol_ErrorBar
     float           LineWeight;
     ImPlotMarker    Marker;
     float           MarkerSize;
@@ -1440,15 +1440,14 @@ IMPLOT_API void LabelAxisValue(const ImPlotAxis& axis, double value, char* buff,
 static inline const ImPlotNextItemData& GetItemData() { return GImPlot->NextItemData; }
 
 // Returns true if a color is set to be automatically determined
-static inline bool IsColorAuto(const ImVec4& col) { return col.w == -1; }
+static inline bool IsColorAuto(const ImU32& col) { return col == -1u; }
 // Returns true if a style color is set to be automatically determined
 static inline bool IsColorAuto(ImPlotCol idx) { return IsColorAuto(GImPlot->Style.Colors[idx]); }
 // Returns the automatically deduced style color
-IMPLOT_API ImVec4 GetAutoColor(ImPlotCol idx);
+IMPLOT_API ImU32 GetAutoColor(ImPlotCol idx);
 
 // Returns the style color whether it is automatic or custom set
-static inline ImVec4 GetStyleColorVec4(ImPlotCol idx) { return IsColorAuto(idx) ? GetAutoColor(idx) : GImPlot->Style.Colors[idx]; }
-static inline ImU32  GetStyleColorU32(ImPlotCol idx)  { return ImGui::ColorConvertFloat4ToU32(GetStyleColorVec4(idx)); }
+static inline ImU32 GetStyleColorU32(ImPlotCol idx) { return IsColorAuto(idx) ? GetAutoColor(idx) : GImPlot->Style.Colors[idx]; }
 
 // Draws vertical text. The position is the bottom left of the text rect.
 IMPLOT_API void AddTextVertical(ImDrawList *DrawList, ImVec2 pos, ImU32 col, const char* text_begin, const char* text_end = nullptr);
@@ -1460,10 +1459,9 @@ static inline ImVec2 CalcTextSizeVertical(const char *text) {
     return ImVec2(sz.y, sz.x);
 }
 // Returns white or black text given background color
-static inline ImU32 CalcTextColor(const ImVec4& bg) { return (bg.x * 0.299f + bg.y * 0.587f + bg.z * 0.114f) > 0.5f ? IM_COL32_BLACK : IM_COL32_WHITE; }
-static inline ImU32 CalcTextColor(ImU32 bg)         { return CalcTextColor(ImGui::ColorConvertU32ToFloat4(bg)); }
+static inline ImU32 CalcTextColor(ImU32 bg)         { return 1u; } // TODO(HJ)
 // Lightens or darkens a color for hover
-static inline ImU32 CalcHoverColor(ImU32 col)       {  return ImMixU32(col, CalcTextColor(col), 32); }
+static inline ImU32 CalcHoverColor(ImU32 col)       {  return col; } // TODO(HJ)
 
 // Clamps a label position so that it fits a rect defined by Min/Max
 static inline ImVec2 ClampLabelPos(ImVec2 pos, const ImVec2& size, const ImVec2& Min, const ImVec2& Max) {

@@ -2657,7 +2657,7 @@ void SetupFinish() {
         ImGui::RenderFrame(plot.FrameRect.Min, plot.FrameRect.Max, GetStyleColorU32(ImPlotCol_FrameBg), true, Style.FrameRounding);
 
     // grid bg
-    DrawList.AddRectFilled(plot.PlotRect.Min, plot.PlotRect.Max, GetStyleColorU32(ImPlotCol_PlotBg));
+    DrawList.AddRectTransparent(plot.PlotRect.Min, plot.PlotRect.Max, GetStyleColorU32(ImPlotCol_PlotBg));
 
     // transform ticks
     for (int i = 0; i < ImAxis_COUNT; i++) {

@@ -1522,7 +1522,7 @@ static inline void CalculateBins(const T* values, int count, ImPlotBin meth, con
             bins_out  = (int)ceil(sqrt(count));
             break;
         case ImPlotBin_Sturges:
-            bins_out  = (int)ceil(1.0 + log2(count));
+            bins_out  = (int)ceil(1.0 + glm::log2(double(count)));
             break;
         case ImPlotBin_Rice:
             bins_out  = (int)ceil(2 * cbrt(count));
